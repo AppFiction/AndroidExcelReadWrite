@@ -1,7 +1,9 @@
 package com.yjn.androidexcelreadwrite;
 
 import android.content.Context;
+import android.database.Cursor;
 import android.net.Uri;
+import android.provider.OpenableColumns;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -38,15 +40,21 @@ public class ExcelUtil {
     public static List<Map<Integer, Object>> readExcelNew(Context context, Uri uri, String filePath) {
         List<Map<Integer, Object>> list = null;
         Workbook wb;
-        if (filePath == null) {
-            return null;
-        }
-        String extString;
-        if (!filePath.endsWith(".xls") && !filePath.endsWith(".xlsx")) {
+//        if (filePath == null) {
+//            return null;
+//        }
+
+        Cursor returnCursor =
+                context.getContentResolver().query(uri, null, null, null, null);
+        int nameIndex = returnCursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
+        int sizeIndex = returnCursor.getColumnIndex(OpenableColumns.SIZE);
+        returnCursor.moveToFirst();
+        String fileName = returnCursor.getString(nameIndex);
+        if (!fileName.endsWith(".xls") && !fileName.endsWith(".xlsx")) {
             Log.e(TAG, "Please select the correct Excel file");
             return null;
         }
-        extString = filePath.substring(filePath.lastIndexOf("."));
+        String extString = fileName.substring(fileName.lastIndexOf("."));
         InputStream is;
         try {
             is = context.getContentResolver().openInputStream(uri);
